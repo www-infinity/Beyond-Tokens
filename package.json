@@ -1,0 +1,14 @@
+{
+  "name": "beyond-tokens",
+  "version": "1.0.0",
+  "description": "Cart 08: Beyond Tokens Audio-Visual – QuantumVisualizer with 8-bit geometry and Silver Spot Price input",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "jest --testEnvironment node"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "license": "MIT"
+}
