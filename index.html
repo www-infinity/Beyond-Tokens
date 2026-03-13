@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Beyond Tokens – Cart 08: Audio-Visual</title>
+  <style>
+    /* ── Reset & base ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #1a1a2e;
+      --surface:   #16213e;
+      --border:    #0f3460;
+      --accent:    #e94560;
+      --gold:      #ffd700;
+      --silver:    #c0c0c0;
+      --green:     #00ff9f;
+      --red:       #ff4757;
+      --text:      #e0e0e0;
+      --muted:     #888;
+      --font-mono: 'Courier New', Courier, monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    /* ── Header ───────────────────────────────────────────────────────── */
+    header {
+      width: 100%;
+      max-width: 900px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    header .badge {
+      font-size: 0.75rem;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0.2rem 0.6rem;
+      border-radius: 2px;
+    }
+
+    /* ── Main grid ────────────────────────────────────────────────────── */
+    main {
+      width: 100%;
+      max-width: 900px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 640px) { main { grid-template-columns: 1fr; } }
+
+    /* ── Card ─────────────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1.25rem;
+    }
+
+    .card.full { grid-column: 1 / -1; }
+
+    .card-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.4rem;
+    }
+
+    /* ── Spot price hero ──────────────────────────────────────────────── */
+    .spot-price {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+
+    .spot-price .amount {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: var(--silver);
+    }
+
+    .spot-price .unit {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .spot-price .trend {
+      font-size: 1.2rem;
+    }
+
+    .trend-up   { color: var(--green); }
+    .trend-down { color: var(--red);   }
+
+    .spot-date { font-size: 0.75rem; color: var(--muted); margin-top: 0.3rem; }
+
+    /* ── Mode badge ───────────────────────────────────────────────────── */
+    .mode-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+
+    .mode-tag {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 2px;
+      border: 1px solid;
+    }
+
+    .mode-tag.mode  { border-color: #0f3460; color: #5ec4ff; }
+    .mode-tag.input { border-color: #3d2b00; color: var(--gold); }
+
+    /* ── Price chart ──────────────────────────────────────────────────── */
+    .chart-wrap {
+      overflow-x: auto;
+    }
+
+    .bar-chart {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      min-width: 260px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 6.5rem 1fr 4.5rem;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .bar-label { font-size: 0.7rem; color: var(--muted); }
+
+    .bar-track {
+      height: 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.6s ease;
+    }
+
+    .bar-fill.up   { background: var(--green); }
+    .bar-fill.down { background: var(--red);   }
+    .bar-fill.same { background: var(--muted); }
+
+    .bar-value { font-size: 0.7rem; color: var(--silver); text-align: right; }
+
+    /* ── Diamond geometry ─────────────────────────────────────────────── */
+    #diamond-canvas {
+      display: block;
+      width: 100%;
+    }
+
+    /* ── Stats grid ───────────────────────────────────────────────────── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .stat {
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.6rem;
+    }
+
+    .stat-label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .stat-value { font-size: 1.1rem; color: var(--silver); margin-top: 0.2rem; font-weight: bold; }
+
+    /* ── Footer ───────────────────────────────────────────────────────── */
+    footer {
+      width: 100%;
+      max-width: 900px;
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header>
+    <h1>◆ Beyond Tokens ◆</h1>
+    <span class="badge">Cart 08 · Audio-Visual · QuantumVisualizer v1.0</span>
+  </header>
+
+  <!-- ── Main content ───────────────────────────────────────────────────── -->
+  <main>
+
+    <!-- Spot price + mode info -->
+    <div class="card">
+      <div class="card-title">Silver Spot Price</div>
+      <div class="spot-price">
+        <span class="amount" id="spot-amount">$0.00</span>
+        <span class="unit">/ troy oz</span>
+        <span class="trend" id="spot-trend"></span>
+      </div>
+      <div class="spot-date" id="spot-date"></div>
+      <div class="mode-row">
+        <span class="mode-tag mode">MODE: 8-BIT-GEOMETRY</span>
+        <span class="mode-tag input">INPUT: SILVER_SPOT_PRICE</span>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="card">
+      <div class="card-title">Statistics</div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">High</div>
+          <div class="stat-value" id="stat-high">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Low</div>
+          <div class="stat-value" id="stat-low">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Avg</div>
+          <div class="stat-value" id="stat-avg">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Change</div>
+          <div class="stat-value" id="stat-change">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Price history bar chart (full width) -->
+    <div class="card full">
+      <div class="card-title">Price History</div>
+      <div class="chart-wrap">
+        <div class="bar-chart" id="bar-chart"></div>
+      </div>
+    </div>
+
+    <!-- 8-bit diamond geometry -->
+    <div class="card full">
+      <div class="card-title">8-bit Geometry – Diamond (keyed to latest normalised price)</div>
+      <canvas id="diamond-canvas" height="200"></canvas>
+    </div>
+
+  </main>
+
+  <footer>
+    QuantumVisualizer v1.0 &nbsp;│&nbsp; 8-bit-geometry &nbsp;│&nbsp; Beyond Tokens
+    &nbsp;·&nbsp;
+    <a href="https://github.com/www-infinity/Beyond-Tokens" style="color:var(--muted)">GitHub</a>
+  </footer>
+
+  <!-- ── Data & rendering ───────────────────────────────────────────────── -->
+  <script>
+    'use strict';
+
+    /* ── Silver Spot Price data ─────────────────────────────────────────── */
+    const HISTORY = [
+      { date: '2026-03-06', price: 31.42 },
+      { date: '2026-03-07', price: 31.78 },
+      { date: '2026-03-08', price: 30.95 },
+      { date: '2026-03-09', price: 31.20 },
+      { date: '2026-03-10', price: 32.10 },
+      { date: '2026-03-11', price: 31.65 },
+      { date: '2026-03-12', price: 32.45 },
+      { date: '2026-03-13', price: 32.80 },
+    ];
+
+    function getNormalisedHistory() {
+      const prices = HISTORY.map(e => e.price);
+      const min = Math.min(...prices);
+      const max = Math.max(...prices);
+      const range = max - min || 1;
+      return HISTORY.map(e => ({ ...e, normalised: (e.price - min) / range }));
+    }
+
+    /* ── Populate page ──────────────────────────────────────────────────── */
+    const data     = getNormalisedHistory();
+    const latest   = data[data.length - 1];
+    const prev     = data[data.length - 2] || latest;
+    const prices   = data.map(d => d.price);
+    const high     = Math.max(...prices);
+    const low      = Math.min(...prices);
+    const avg      = prices.reduce((a, b) => a + b, 0) / prices.length;
+    const change   = latest.price - prev.price;
+    const isUp     = latest.price >= prev.price;
+
+    /* Spot price hero */
+    document.getElementById('spot-amount').textContent = '$' + latest.price.toFixed(2);
+    const trendEl = document.getElementById('spot-trend');
+    trendEl.textContent = isUp ? '▲' : '▼';
+    trendEl.className   = 'trend ' + (isUp ? 'trend-up' : 'trend-down');
+    document.getElementById('spot-date').textContent = latest.date;
+
+    /* Stats */
+    document.getElementById('stat-high').textContent   = '$' + high.toFixed(2);
+    document.getElementById('stat-low').textContent    = '$' + low.toFixed(2);
+    document.getElementById('stat-avg').textContent    = '$' + avg.toFixed(2);
+    const changeEl = document.getElementById('stat-change');
+    changeEl.textContent = (change >= 0 ? '+' : '') + change.toFixed(2);
+    changeEl.style.color = change >= 0 ? 'var(--green)' : 'var(--red)';
+
+    /* Bar chart */
+    const chartEl = document.getElementById('bar-chart');
+    data.forEach((point, i) => {
+      const prevPoint = data[i - 1] || point;
+      const dir = point.price >= prevPoint.price ? 'up' : (point.price < prevPoint.price ? 'down' : 'same');
+      const row = document.createElement('div');
+      row.className = 'bar-row';
+      row.innerHTML =
+        `<span class="bar-label">${point.date}</span>` +
+        `<div class="bar-track"><div class="bar-fill ${dir}" style="width:${(point.normalised * 100).toFixed(1)}%"></div></div>` +
+        `<span class="bar-value">$${point.price.toFixed(2)}</span>`;
+      chartEl.appendChild(row);
+    });
+
+    /* ── Diamond canvas ─────────────────────────────────────────────────── */
+    const canvas  = document.getElementById('diamond-canvas');
+    const ctx     = canvas.getContext('2d');
+    const radius  = Math.max(1, Math.round(latest.normalised * 4) + 1);
+    const CELL    = 28;
+    const PAD     = 20;
+    const SIZE    = (radius * 2 + 1) * CELL + PAD * 2;
+    canvas.width  = SIZE;
+    canvas.height = SIZE;
+    canvas.style.maxWidth = SIZE + 'px';
+
+    ctx.clearRect(0, 0, SIZE, SIZE);
+
+    const cx = SIZE / 2;
+    const cy = SIZE / 2;
+
+    /* Grid of diamond cells */
+    for (let r = -radius; r <= radius; r++) {
+      const half = radius - Math.abs(r);
+      for (let c = -half; c <= half; c++) {
+        const x = cx + c * CELL;
+        const y = cy + r * CELL;
+        const isBorder = Math.abs(c) === half;
+        ctx.save();
+        ctx.font      = CELL + 'px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        if (isBorder) {
+          ctx.fillStyle = '#ffd700';
+          ctx.shadowColor  = '#ffd700';
+          ctx.shadowBlur   = 8;
+          ctx.fillText('◆', x, y);
+        } else {
+          ctx.fillStyle = 'rgba(255,215,0,0.12)';
+          ctx.fillText('·', x, y);
+        }
+        ctx.restore();
+      }
+    }
+  </script>
+
+</body>
+</html>
